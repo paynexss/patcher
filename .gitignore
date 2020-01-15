@@ -1,0 +1,22 @@
+out
+
+.idea
+patcher.iml
+
+.git
+
+*.class
+*.war
+*.ear
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+*.class
+.class
+.idea
+*.iml
+out
+gen
+bin
+rebel.xml
