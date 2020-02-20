@@ -1,7 +1,6 @@
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.io.FileUtil;
@@ -91,8 +90,39 @@ public class PatcherDialog extends JDialog {
         }
 
         try {
+            Module module = event.getData(DataKeys.MODULE);
+            CompilerModuleExtension instance = CompilerModuleExtension.getInstance(module);
+            // 编译目录
+            String compilerOutputUrl = instance.getCompilerOutputPath().getPath();
+            // JavaWeb项目的WebRoot目录
+            String webPath = "/" + webTextField.getText() + "/";
+            // 导出目录
+            String exportPath = textField.getText() + webPath;
+            for (int i = 0; i < model.getSize(); i++) {
+                VirtualFile element = model.getElementAt(i);
+                String elementName = element.getName();
+                String elementPath = element.getPath();
+                if (elementName.endsWith(".java")) {
+                    String className = File.separator + elementPath.split("/src/")[1].replace(".java", ".class");
+                    File from = new File(compilerOutputUrl + className);
+                    File to = new File(exportPath + "WEB-INF" + File.separator + "classes" + className);
+                    File parentFile = to.getParentFile();
+                    if (!parentFile.exists()) {
+                        parentFile.mkdirs();
+                    }
+                    FileUtil.copy(from, to);
+                } else {
+                    File from = new File(elementPath);
+                    File to = new File(exportPath + elementPath.split(webPath)[1]);
+                    File parentFile = to.getParentFile();
+                    if (!parentFile.exists()) {
+                        parentFile.mkdirs();
+                    }
+                    FileUtil.copy(from, to);
+                }
+            }
             // 模块对象
-            Module[] modules = ModuleManager.getInstance(event.getProject()).getModules();
+            /*Module[] modules = ModuleManager.getInstance(event.getProject()).getModules();
             for (Module module : modules) {
                 CompilerModuleExtension instance = CompilerModuleExtension.getInstance(module);
                 // 编译目录
@@ -124,7 +154,7 @@ public class PatcherDialog extends JDialog {
                         FileUtil.copy(from, to);
                     }
                 }
-            }
+            }*/
         } catch (Exception e) {
             Messages.showErrorDialog(this, "Create Patcher Error!", "Error");
             e.printStackTrace();
