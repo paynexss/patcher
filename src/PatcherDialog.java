@@ -3,10 +3,10 @@ import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
+import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -106,55 +106,13 @@ public class PatcherDialog extends JDialog {
                     String className = File.separator + elementPath.split("/src/")[1].replace(".java", ".class");
                     File from = new File(compilerOutputUrl + className);
                     File to = new File(exportPath + "WEB-INF" + File.separator + "classes" + className);
-                    File parentFile = to.getParentFile();
-                    if (!parentFile.exists()) {
-                        parentFile.mkdirs();
-                    }
-                    FileUtil.copy(from, to);
+                    FileUtils.copyToDirectory(from, to.getParentFile());
                 } else {
                     File from = new File(elementPath);
                     File to = new File(exportPath + elementPath.split(webPath)[1]);
-                    File parentFile = to.getParentFile();
-                    if (!parentFile.exists()) {
-                        parentFile.mkdirs();
-                    }
-                    FileUtil.copy(from, to);
+                    FileUtils.copyToDirectory(from, to.getParentFile());
                 }
             }
-            // 模块对象
-            /*Module[] modules = ModuleManager.getInstance(event.getProject()).getModules();
-            for (Module module : modules) {
-                CompilerModuleExtension instance = CompilerModuleExtension.getInstance(module);
-                // 编译目录
-                String compilerOutputUrl = instance.getCompilerOutputPath().getPath();
-                // JavaWeb项目的WebRoot目录
-                String webPath = "/" + webTextField.getText() + "/";
-                // 导出目录
-                String exportPath = textField.getText() + webPath;
-                for (int i = 0; i < model.getSize(); i++) {
-                    VirtualFile element = model.getElementAt(i);
-                    String elementName = element.getName();
-                    String elementPath = element.getPath();
-                    if (elementName.endsWith(".java")) {
-                        String className = File.separator + elementPath.split("/src/")[1].replace(".java", ".class");
-                        File from = new File(compilerOutputUrl + className);
-                        File to = new File(exportPath + "WEB-INF" + File.separator + "classes" + className);
-                        File parentFile = to.getParentFile();
-                        if (!parentFile.exists()) {
-                            parentFile.mkdirs();
-                        }
-                        FileUtil.copy(from, to);
-                    } else {
-                        File from = new File(elementPath);
-                        File to = new File(exportPath + elementPath.split(webPath)[1]);
-                        File parentFile = to.getParentFile();
-                        if (!parentFile.exists()) {
-                            parentFile.mkdirs();
-                        }
-                        FileUtil.copy(from, to);
-                    }
-                }
-            }*/
         } catch (Exception e) {
             Messages.showErrorDialog(this, "Create Patcher Error!", "Error");
             e.printStackTrace();
@@ -163,6 +121,7 @@ public class PatcherDialog extends JDialog {
         // add your code here
         dispose();
     }
+
 
     private void onCancel() {
         // add your code here if necessary
